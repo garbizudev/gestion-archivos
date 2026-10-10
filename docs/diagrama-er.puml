@@ -1,0 +1,118 @@
+@startuml diagrama-er
+' Diagrama entidad-relación - Plataforma de gestión segura de archivos
+' Fuente: backend/src/database/migrations/1791652441865-InitialSchema.ts
+
+!theme plain
+hide circle
+skinparam linetype ortho
+skinparam roundcorner 6
+skinparam class {
+  BackgroundColor White
+  BorderColor #34495E
+  HeaderBackgroundColor #EAF2F8
+}
+
+title Plataforma de gestión segura de archivos — Modelo entidad-relación
+
+entity "roles" as roles {
+  * id : SMALLSERIAL <<PK>>
+  --
+  * code : VARCHAR(30) <<UQ>>
+  * name : VARCHAR(60)
+    description : TEXT
+  * is_active : BOOLEAN = true
+  * created_at : TIMESTAMPTZ
+  * updated_at : TIMESTAMPTZ
+}
+
+entity "areas" as areas {
+  * id : UUID <<PK>>
+  --
+  * name : VARCHAR(100) <<UQ>>
+    description : TEXT
+  * is_active : BOOLEAN = true
+  * created_at : TIMESTAMPTZ
+  * updated_at : TIMESTAMPTZ
+}
+
+entity "users" as users {
+  * id : UUID <<PK>>
+  --
+  * email : VARCHAR(150) <<UQ>>
+  * full_name : VARCHAR(150)
+  * password_hash : VARCHAR(100)
+  * role_id : SMALLINT <<FK>>
+    area_id : UUID <<FK>>
+  * is_active : BOOLEAN = true
+  * created_at : TIMESTAMPTZ
+  * updated_at : TIMESTAMPTZ
+}
+
+entity "manager_areas" as manager_areas {
+  * manager_id : UUID <<PK, FK>>
+  * area_id : UUID <<PK, FK>>
+}
+
+entity "files" as files {
+  * id : UUID <<PK>>
+  --
+  * original_name : VARCHAR(255)
+  * storage_key : VARCHAR(255) <<UQ>>
+  * mime_type : VARCHAR(150)
+  * size_bytes : BIGINT
+  * checksum_sha256 : CHAR(64)
+  * owner_id : UUID <<FK>>
+    area_id : UUID <<FK>>
+  * created_at : TIMESTAMPTZ
+    deleted_at : TIMESTAMPTZ
+    deleted_by_id : UUID <<FK>>
+}
+
+entity "audit_logs" as audit_logs {
+  * id : BIGSERIAL <<PK>>
+  --
+  * action : audit_action
+    actor_id : UUID <<FK>>
+    actor_area_id : UUID
+    file_id : UUID <<FK>>
+    file_name : VARCHAR(255)
+    ip_address : VARCHAR(45)
+    user_agent : VARCHAR(255)
+    details : JSONB
+  * created_at : TIMESTAMPTZ
+}
+
+enum "audit_action" as audit_action {
+  LOGIN
+  LOGIN_FAILED
+  LOGOUT
+  UPLOAD
+  DOWNLOAD
+  DELETE
+  ACCESS_DENIED
+}
+
+' Relaciones
+roles  ||--o{ users          : "asigna rol"
+areas  |o--o{ users          : "pertenece a"
+users  ||--o{ manager_areas  : "gestiona (gerente)"
+areas  ||--o{ manager_areas  : "gestionada por"
+users  ||--o{ files          : "es dueño de"
+areas  |o--o{ files          : "agrupa"
+users  |o--o{ files          : "eliminó"
+users  |o--o{ audit_logs     : "realiza"
+files  |o--o{ audit_logs     : "afecta"
+
+audit_logs .. audit_action
+
+legend right
+  * = NOT NULL
+  PK = llave primaria · FK = llave foránea · UQ = único
+  roles.code: STANDARD | AREA_HEAD | MANAGER | ADMIN
+  is_active: desactivación lógica (users, roles, areas)
+  files.deleted_at: eliminación lógica con trazabilidad
+  files.area_id / audit_logs.actor_area_id:
+  área al momento de la acción (snapshot)
+endlegend
+
+@enduml

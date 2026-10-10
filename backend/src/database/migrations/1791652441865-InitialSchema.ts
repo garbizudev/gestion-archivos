@@ -5,16 +5,13 @@ export class InitialSchema1791652441865 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TYPE "public"."role_code" AS ENUM('STANDARD', 'AREA_HEAD', 'MANAGER', 'ADMIN')`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE "roles" ("id" SMALLSERIAL NOT NULL, "code" "public"."role_code" NOT NULL, "name" character varying(60) NOT NULL, "description" text, CONSTRAINT "UQ_f6d54f95c31b73fb1bdd8e91d0c" UNIQUE ("code"), CONSTRAINT "PK_c1433d71a4838793a49dcad46ab" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "roles" ("id" SMALLSERIAL NOT NULL, "code" character varying(30) NOT NULL, "name" character varying(60) NOT NULL, "description" text, "is_active" boolean NOT NULL DEFAULT true, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_f6d54f95c31b73fb1bdd8e91d0c" UNIQUE ("code"), CONSTRAINT "PK_c1433d71a4838793a49dcad46ab" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "email" character varying(150) NOT NULL, "full_name" character varying(150) NOT NULL, "password_hash" character varying(100) NOT NULL, "role_id" smallint NOT NULL, "area_id" uuid, "is_active" boolean NOT NULL DEFAULT true, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "areas" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "name" character varying(100) NOT NULL, "description" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_8c2ad80240e18fcac9e7c526311" UNIQUE ("name"), CONSTRAINT "PK_5110493f6342f34c978c084d0d6" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "areas" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "name" character varying(100) NOT NULL, "description" text, "is_active" boolean NOT NULL DEFAULT true, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_8c2ad80240e18fcac9e7c526311" UNIQUE ("name"), CONSTRAINT "PK_5110493f6342f34c978c084d0d6" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "files" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "original_name" character varying(255) NOT NULL, "storage_key" character varying(255) NOT NULL, "mime_type" character varying(150) NOT NULL, "size_bytes" bigint NOT NULL, "checksum_sha256" character(64) NOT NULL, "owner_id" uuid NOT NULL, "area_id" uuid, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP WITH TIME ZONE, "deleted_by_id" uuid, CONSTRAINT "UQ_e916afbf2015d561fd0842ff898" UNIQUE ("storage_key"), CONSTRAINT "PK_6c16b9093a142e0e7613b04a3d9" PRIMARY KEY ("id"))`,
@@ -140,6 +137,5 @@ export class InitialSchema1791652441865 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "areas"`);
     await queryRunner.query(`DROP TABLE "users"`);
     await queryRunner.query(`DROP TABLE "roles"`);
-    await queryRunner.query(`DROP TYPE "public"."role_code"`);
   }
 }
