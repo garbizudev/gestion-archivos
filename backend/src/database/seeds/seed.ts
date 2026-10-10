@@ -1,14 +1,18 @@
 import 'reflect-metadata';
-import { hash } from 'bcrypt';
 import { EntityManager } from 'typeorm';
 import dataSource from '../data-source';
 import { Area } from '../../areas/entities/area.entity';
+import { hashPassword } from '../../auth/password';
 import { Role } from '../../roles/entities/role.entity';
 import { RoleCode } from '../../roles/role-code.enum';
 import { User } from '../../users/entities/user.entity';
 
-
-const BCRYPT_ROUNDS = 12;
+/**
+ * Carga roles, áreas y usuarios de prueba. Es idempotente: lo que ya existe
+ * (por código de rol, nombre de área o email) se omite.
+ *
+ * Uso: npm run seed   (requiere SEED_DEMO_PASSWORD en el .env)
+ */
 
 const ROLES: Pick<Role, 'code' | 'name' | 'description'>[] = [
   {
@@ -126,7 +130,7 @@ async function seedUsers(
   password: string,
 ): Promise<void> {
   const repo = manager.getRepository(User);
-  const passwordHash = await hash(password, BCRYPT_ROUNDS);
+  const passwordHash = await hashPassword(password);
 
   for (const data of USERS) {
     if (await repo.existsBy({ email: data.email })) {

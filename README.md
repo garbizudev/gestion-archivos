@@ -37,7 +37,8 @@ cd backend
 # crear backend/.env con las variables de la sección siguiente
 npm install
 npm run migration:run
-npm run start:dev         # http://localhost:3000/api
+npm run start:dev         # API: http://localhost:3000/api
+                          # Swagger: http://localhost:3000/api/docs
 
 # 3. Frontend
 cd ../frontend
