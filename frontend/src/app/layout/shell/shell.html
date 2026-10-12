@@ -1,0 +1,30 @@
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">
+      <mat-icon>folder_shared</mat-icon>
+    </span>
+    <span class="brand-name">Gestión de Archivos</span>
+  </div>
+
+  @if (auth.user(); as user) {
+    <div class="user">
+      <div class="user-info">
+        <span class="user-name">{{ user.fullName }}</span>
+        <span class="user-role">
+          {{ user.roleName }}
+          @if (user.areaName) {
+            · {{ user.areaName }}
+          }
+        </span>
+      </div>
+      <span class="avatar">{{ initials() }}</span>
+      <button mat-icon-button matTooltip="Cerrar sesión" aria-label="Cerrar sesión" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  }
+</header>
+
+<main class="content">
+  <router-outlet />
+</main>

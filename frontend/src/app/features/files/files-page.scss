@@ -1,0 +1,148 @@
+:host {
+  display: block;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ga-text-primary);
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  color: var(--ga-text-secondary);
+}
+
+.card {
+  border-radius: var(--ga-radius-md);
+  border: 1px solid var(--ga-border);
+  background: var(--ga-surface);
+  box-shadow: var(--ga-shadow-sm);
+  overflow: hidden;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  background: transparent;
+}
+
+th.mat-mdc-header-cell {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ga-text-secondary);
+  background: var(--ga-surface-hover);
+}
+
+tr.mat-mdc-row:hover {
+  background: var(--ga-surface-hover);
+}
+
+.numeric {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.file-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.file-name__text {
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.file-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ga-radius-sm);
+  color: var(--ga-primary-light);
+  background: var(--ga-primary-bg);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.owner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: var(--ga-radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ga-primary);
+  background: var(--ga-primary-bg);
+  white-space: nowrap;
+}
+
+.badge--mine {
+  color: var(--ga-accent);
+  background: var(--ga-accent-bg);
+}
+
+.muted {
+  color: var(--ga-text-muted);
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 24px;
+  color: var(--ga-text-secondary);
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--ga-text-muted);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.state--error mat-icon {
+  color: var(--ga-error);
+}
+
+.table-footer {
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--ga-border);
+  font-size: 13px;
+  color: var(--ga-text-secondary);
+}

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/auth/auth.guards';
-
+//Sirve para el ruteo de las dizstintas rutas del sistema
 export const routes: Routes = [
   {
     path: 'login',
@@ -11,8 +11,15 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/home/home-page').then((m) => m.HomePage),
+    loadComponent: () => import('./layout/shell/shell').then((m) => m.Shell),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'archivos' },
+      {
+        path: 'archivos',
+        loadComponent: () =>
+          import('./features/files/files-page').then((m) => m.FilesPage),
+      },
+    ],
   },
   { path: '**', redirectTo: '' },
 ];
