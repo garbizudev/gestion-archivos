@@ -66,6 +66,7 @@ en producción, en la configuración de variables de entorno de la plataforma.
 | `JWT_SECRET`          |    ✅     | —                                    | Secreto para firmar los tokens (largo y aleatorio)      |
 | `JWT_EXPIRES_IN`      |           | `1h`                                 | Vigencia del token                                      |
 | `MAX_UPLOAD_MB`       |           | `20`                                 | Tamaño máximo por archivo                               |
+| `ALLOWED_FILE_EXTENSIONS` |       | `pdf,docx,xlsx,png,jpg`              | Extensiones habilitadas (subconjunto del catálogo seguro: pdf, doc, docx, xls, xlsx, ppt, pptx, txt, csv, png, jpg, jpeg, gif, webp, zip). Si no se define, se habilitan todas |
 | `STORAGE_DRIVER`      |           | `s3`                                 | `s3` o `local` (disco)                                  |
 | `STORAGE_LOCAL_DIR`   |           | `./storage`                          | Directorio para el driver `local`                       |
 | `S3_ENDPOINT`         |           | `http://localhost:8333`              | Endpoint S3 (vacío para AWS S3)                         |

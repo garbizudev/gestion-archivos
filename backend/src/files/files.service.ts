@@ -1,19 +1,33 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash, randomUUID } from 'node:crypto';
 import { Repository } from 'typeorm';
 import { AuthUser } from '../auth/auth-user';
+import { AppConfig } from '../config/configuration';
 import { StorageService } from '../storage/storage.service';
 import { FileResponseDto } from './dto/file-response.dto';
 import { StoredFile } from './entities/stored-file.entity';
+import { FILE_TYPE_CATALOG, getExtension } from './file-types';
 
 @Injectable()
 export class FilesService {
+  private readonly allowedExtensions: string[];
+
   constructor(
     @InjectRepository(StoredFile)
     private readonly files: Repository<StoredFile>,
     private readonly storage: StorageService,
-  ) {}
+    config: ConfigService<AppConfig, true>,
+  ) {
+    this.allowedExtensions = config.get('files.allowedExtensions', {
+      infer: true,
+    });
+  }
 
   //Función para realizar la carga de archivos
   async upload(
@@ -30,16 +44,25 @@ export class FilesService {
       throw new BadRequestException('El archivo está vacío');
     }
 
+    //Para validar la extensión, obtenemos la del arhcivo original y validamos que sea de las permitidas
+    const extension = getExtension(upload.originalname);
+    if (!this.allowedExtensions.includes(extension)) {
+      throw new UnsupportedMediaTypeException(
+        `Tipo de archivo no permitido. Extensiones permitidas: ${this.allowedExtensions.join(', ')}`,
+      );
+    }
+    const mimeType = FILE_TYPE_CATALOG[extension];
+
     const storageKey = randomUUID(); //Generamos un identificador aleatorio
 
-    await this.storage.put(storageKey, upload.buffer, upload.mimetype);
+    await this.storage.put(storageKey, upload.buffer, mimeType);
 
     //Aquí se persiste la información de file en la BD
     const saved = await this.files.save(
       this.files.create({
         originalName: upload.originalname,
         storageKey,
-        mimeType: upload.mimetype,
+        mimeType,
         sizeBytes: upload.size,
         checksumSha256: createHash('sha256')
           .update(upload.buffer)
