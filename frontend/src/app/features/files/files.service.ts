@@ -9,7 +9,15 @@ export class FilesService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/files`;
 
+  //List es el método para imprimir los archivos
   list(): Observable<FileItem[]> {
     return this.http.get<FileItem[]>(this.baseUrl);
+  }
+
+  //Descarga de archivo
+  download(id: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/download`, {
+      responseType: 'blob',
+    });
   }
 }

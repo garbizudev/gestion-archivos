@@ -52,6 +52,19 @@ tr.mat-mdc-row:hover {
   background: var(--ga-surface-hover);
 }
 
+.actions {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.action-spinner {
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+}
+
 .numeric {
   text-align: right;
   white-space: nowrap;

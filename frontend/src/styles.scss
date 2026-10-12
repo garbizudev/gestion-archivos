@@ -43,3 +43,15 @@ body {
 .mat-icon {
   font-family: 'Material Icons Outlined';
 }
+
+.ga-snackbar--success {
+  --mat-snack-bar-container-color: var(--ga-success);
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
+
+.ga-snackbar--error {
+  --mat-snack-bar-container-color: var(--ga-error);
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
