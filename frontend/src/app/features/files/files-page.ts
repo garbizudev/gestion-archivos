@@ -1,15 +1,16 @@
 import { DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { RoleCode } from '../../core/models/auth.models';
-import { FileItem } from '../../core/models/file.models';
+import { FileItem, UploadRules } from '../../core/models/file.models';
 import { NotificationService } from '../../core/ui/notification.service';
 import {
   ConfirmDialog,
@@ -27,6 +28,7 @@ import { FilesService } from './files.service';
     DatePipe,
     MatButtonModule,
     MatIconModule,
+    MatProgressBarModule,
     MatProgressSpinnerModule,
     MatTableModule,
     MatTooltipModule,
@@ -52,6 +54,26 @@ export class FilesPage implements OnInit {
   ];
   protected readonly downloadingId = signal<string | null>(null);
   protected readonly deletingId = signal<string | null>(null);
+  protected readonly uploadRules = signal<UploadRules | null>(null);
+  protected readonly uploading = signal<{
+    fileName: string;
+    progress: number;
+  } | null>(null);
+  protected readonly acceptedTypes = computed(
+    () =>
+      this.uploadRules()
+        ?.allowedExtensions.map((extension) => `.${extension}`)
+        .join(',') ?? '',
+  );
+  protected readonly uploadHint = computed(() => {
+    const rules = this.uploadRules();
+    if (!rules) {
+      return '';
+    }
+    return `Máximo ${this.fileSize.transform(rules.maxUploadBytes)} · ${rules.allowedExtensions.join(', ')}`;
+  });
+
+  private readonly fileSize = new FileSizePipe();
   protected readonly files = signal<FileItem[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
@@ -78,6 +100,78 @@ export class FilesPage implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    this.filesService.uploadRules().subscribe({
+      next: (rules) => this.uploadRules.set(rules),
+      error: () => this.uploadRules.set(null),
+    });
+  }
+
+  protected onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    const validationError = this.validateFile(file);
+    if (validationError) {
+      this.notifications.error(validationError);
+      return;
+    }
+
+    this.upload(file);
+  }
+
+  private validateFile(file: File): string | null {
+    if (file.size === 0) {
+      return 'El archivo está vacío.';
+    }
+
+    const rules = this.uploadRules();
+    if (!rules) {
+      return null;
+    }
+
+    if (file.size > rules.maxUploadBytes) {
+      return `El archivo supera el tamaño máximo permitido de ${this.fileSize.transform(rules.maxUploadBytes)}.`;
+    }
+
+    const extension = file.name.includes('.')
+      ? file.name.split('.').pop()!.toLowerCase()
+      : '';
+    if (!rules.allowedExtensions.includes(extension)) {
+      return `Tipo de archivo no permitido. Extensiones permitidas: ${rules.allowedExtensions.join(', ')}.`;
+    }
+
+    return null;
+  }
+
+  private upload(file: File): void {
+    this.uploading.set({ fileName: file.name, progress: 0 });
+
+    this.filesService.upload(file).subscribe({
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const progress = event.total
+            ? Math.round((event.loaded / event.total) * 100)
+            : 0;
+          this.uploading.set({ fileName: file.name, progress });
+        } else if (event.type === HttpEventType.Response && event.body) {
+          const created = event.body;
+          this.uploading.set(null);
+          this.error.set(false);
+          this.files.update((files) => [created, ...files]);
+          this.notifications.success(`Se cargó "${created.originalName}".`);
+        }
+      },
+      error: (error: unknown) => {
+        this.uploading.set(null);
+        this.notifications.error(
+          getApiErrorMessage(error, 'No se pudo cargar el archivo.'),
+        );
+      },
+    });
   }
 
   protected load(): void {

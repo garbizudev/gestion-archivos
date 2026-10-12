@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { FileItem } from '../../core/models/file.models';
+import { FileItem, UploadRules } from '../../core/models/file.models';
 
 @Injectable({ providedIn: 'root' })
 export class FilesService {
@@ -24,5 +24,21 @@ export class FilesService {
   //Servicio de eliminación
   remove(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  //Retorna las reglas de carga como extensión y tamaño
+  uploadRules(): Observable<UploadRules> {
+    return this.http.get<UploadRules>(`${this.baseUrl}/upload-rules`);
+  }
+
+  //Servicio de carga de archivo
+  upload(file: File): Observable<HttpEvent<FileItem>> {
+    const body = new FormData();
+    body.append('file', file, file.name);
+
+    return this.http.post<FileItem>(this.baseUrl, body, {
+      reportProgress: true,
+      observe: 'events',
+    });
   }
 }

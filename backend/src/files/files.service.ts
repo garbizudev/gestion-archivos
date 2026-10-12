@@ -18,6 +18,7 @@ import { RequestContext } from '../common/request-context';
 import { AppConfig } from '../config/configuration';
 import { StorageService } from '../storage/storage.service';
 import { FileResponseDto } from './dto/file-response.dto';
+import { UploadRulesDto } from './dto/upload-rules.dto';
 import { StoredFile } from './entities/stored-file.entity';
 import { FilePolicy, FileScope } from './file.policy';
 import {
@@ -30,6 +31,7 @@ import {
 export class FilesService {
   private readonly logger = new Logger(FilesService.name);
   private readonly allowedExtensions: string[];
+  private readonly maxUploadBytes: number;
 
   constructor(
     @InjectRepository(StoredFile)
@@ -42,6 +44,14 @@ export class FilesService {
     this.allowedExtensions = config.get('files.allowedExtensions', {
       infer: true,
     });
+    this.maxUploadBytes = config.get('files.maxUploadBytes', { infer: true });
+  }
+
+  uploadRules(): UploadRulesDto {
+    return {
+      maxUploadBytes: this.maxUploadBytes,
+      allowedExtensions: this.allowedExtensions,
+    };
   }
 
   //Función para realizar la carga de archivos

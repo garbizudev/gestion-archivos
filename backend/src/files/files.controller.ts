@@ -31,6 +31,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthUser } from '../auth/dto/auth-user.dto';
 import { ReqContext, type RequestContext } from '../common/request-context';
 import { FileResponseDto } from './dto/file-response.dto';
+import { UploadRulesDto } from './dto/upload-rules.dto';
 import { contentDisposition } from './file-types';
 import { FilesService } from './files.service';
 import { FileTooLargeFilter } from './filters/file-too-large.filter';
@@ -77,6 +78,17 @@ export class FilesController {
   @ApiOkResponse({ type: [FileResponseDto] })
   list(@CurrentUser() user: AuthUser): Promise<FileResponseDto[]> {
     return this.files.list(user);
+  }
+
+  @Get('upload-rules')
+  @ApiOperation({
+    summary: 'Reglas de carga',
+    description:
+      'Tamaño máximo y extensiones permitidas, para validar en el cliente antes de enviar.',
+  })
+  @ApiOkResponse({ type: UploadRulesDto })
+  uploadRules(): UploadRulesDto {
+    return this.files.uploadRules();
   }
 
   @Get(':id/download')

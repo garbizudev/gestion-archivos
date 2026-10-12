@@ -19,6 +19,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/files/files-page').then((m) => m.FilesPage),
       },
+      {
+        path: 'historial',
+        loadComponent: () =>
+          import('./features/audit/audit-page').then((m) => m.AuditPage),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

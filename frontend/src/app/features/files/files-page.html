@@ -3,11 +3,48 @@
     <h1 class="page-title">Archivos</h1>
     <p class="page-subtitle">{{ scopeDescription() }}</p>
   </div>
-  <button mat-stroked-button (click)="load()" [disabled]="loading()">
-    <mat-icon>refresh</mat-icon>
-    Actualizar
-  </button>
+  <div class="header-actions">
+    <button mat-stroked-button (click)="load()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
+    <button
+      mat-flat-button
+      (click)="fileInput.click()"
+      [disabled]="uploading() !== null"
+    >
+      <mat-icon>upload</mat-icon>
+      Subir archivo
+    </button>
+    <input
+      #fileInput
+      type="file"
+      hidden
+      [accept]="acceptedTypes()"
+      (change)="onFileSelected($event)"
+    />
+  </div>
 </header>
+
+@if (uploadHint()) {
+  <p class="upload-hint">
+    <mat-icon>info</mat-icon>
+    {{ uploadHint() }}
+  </p>
+}
+
+@if (uploading(); as current) {
+  <div class="upload-panel">
+    <span class="upload-icon">
+      <mat-icon>cloud_upload</mat-icon>
+    </span>
+    <div class="upload-info">
+      <span class="upload-name">{{ current.fileName }}</span>
+      <mat-progress-bar mode="determinate" [value]="current.progress" />
+    </div>
+    <span class="upload-percent">{{ current.progress }}%</span>
+  </div>
+}
 
 <section class="card">
   @if (loading()) {

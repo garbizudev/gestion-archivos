@@ -16,3 +16,8 @@ export interface FileItem {
   area: AreaRef | null;
   canDelete: boolean;
 }
+
+export interface UploadRules {
+  maxUploadBytes: number;
+  allowedExtensions: string[];
+}

@@ -6,6 +6,17 @@
     <span class="brand-name">Gestión de Archivos</span>
   </div>
 
+  <nav class="nav">
+    <a class="nav-link" routerLink="/archivos" routerLinkActive="nav-link--active">
+      <mat-icon>folder</mat-icon>
+      <span>Archivos</span>
+    </a>
+    <a class="nav-link" routerLink="/historial" routerLinkActive="nav-link--active">
+      <mat-icon>history</mat-icon>
+      <span>Historial</span>
+    </a>
+  </nav>
+
   @if (auth.user(); as user) {
     <div class="user">
       <div class="user-info">
