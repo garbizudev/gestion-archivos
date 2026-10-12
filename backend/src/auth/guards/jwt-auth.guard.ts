@@ -10,10 +10,8 @@ import { AuthenticatedRequest, JwtPayload } from '../auth-user';
 import { AuthService } from '../auth.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
-/**
- * Guard global: toda ruta exige un JWT válido salvo las marcadas con @Public().
- * Así, un endpoint nuevo nunca queda expuesto por olvido.
- */
+
+
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(

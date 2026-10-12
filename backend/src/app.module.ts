@@ -8,6 +8,7 @@ import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import configuration, { AppConfig } from './config/configuration';
 import { buildTypeOrmOptions } from './database/typeorm.options';
+import { FilesModule } from './files/files.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
@@ -18,11 +19,12 @@ import { StorageModule } from './storage/storage.module';
       useFactory: (config: ConfigService<AppConfig, true>) =>
         buildTypeOrmOptions(config.get('db', { infer: true })),
     }),
-    // Límite general por IP; rutas sensibles (login) definen uno más estricto.
+    
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     StorageModule,
     AuditModule,
     AuthModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
