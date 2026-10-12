@@ -8,7 +8,10 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash, randomUUID } from 'node:crypto';
 import { Repository } from 'typeorm';
+import { AuditAction } from '../audit/audit-action.enum';
+import { AuditService } from '../audit/audit.service';
 import { AuthUser } from '../auth/auth-user';
+import { RequestContext } from '../common/request-context';
 import { AppConfig } from '../config/configuration';
 import { StorageService } from '../storage/storage.service';
 import { FileResponseDto } from './dto/file-response.dto';
@@ -28,6 +31,7 @@ export class FilesService {
     @InjectRepository(StoredFile)
     private readonly files: Repository<StoredFile>,
     private readonly storage: StorageService,
+    private readonly audit: AuditService,
     config: ConfigService<AppConfig, true>,
   ) {
     this.allowedExtensions = config.get('files.allowedExtensions', {
@@ -39,6 +43,7 @@ export class FilesService {
   async upload(
     user: AuthUser,
     upload: Express.Multer.File | undefined,
+    context: RequestContext,
   ): Promise<FileResponseDto> {
     if (!upload) { //Validación si trae un archivo o no 
       throw new BadRequestException(
@@ -90,6 +95,15 @@ export class FilesService {
       );
       throw error;
     }
+
+    //Registramos el movimiento en la auditoría con una acción de UPLOAD
+    await this.audit.log({
+      action: AuditAction.UPLOAD,
+      actor: user,
+      file: saved,
+      context,
+      details: { sizeBytes: saved.sizeBytes, mimeType: saved.mimeType },
+    });
 
     return { //Retornamos la info según el FileResponseDto
       id: saved.id,

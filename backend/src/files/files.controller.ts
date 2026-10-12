@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthUser } from '../auth/dto/auth-user.dto';
+import { ReqContext, type RequestContext } from '../common/request-context';
 import { FileResponseDto } from './dto/file-response.dto';
 import { FilesService } from './files.service';
 import { FileTooLargeFilter } from './filters/file-too-large.filter';
@@ -50,7 +51,8 @@ export class FilesController {
   upload(
     @UploadedFile() file: Express.Multer.File | undefined,
     @CurrentUser() user: AuthUser,
+    @ReqContext() context: RequestContext,
   ): Promise<FileResponseDto> {
-    return this.files.upload(user, file);
+    return this.files.upload(user, file, context);
   }
 }
