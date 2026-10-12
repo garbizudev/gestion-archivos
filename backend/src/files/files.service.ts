@@ -12,7 +12,11 @@ import { AppConfig } from '../config/configuration';
 import { StorageService } from '../storage/storage.service';
 import { FileResponseDto } from './dto/file-response.dto';
 import { StoredFile } from './entities/stored-file.entity';
-import { FILE_TYPE_CATALOG, getExtension } from './file-types';
+import {
+  FILE_TYPE_CATALOG,
+  getExtension,
+  sanitizeFileName,
+} from './file-types';
 
 @Injectable()
 export class FilesService {
@@ -45,7 +49,9 @@ export class FilesService {
     }
 
     //Para validar la extensión, obtenemos la del arhcivo original y validamos que sea de las permitidas
-    const extension = getExtension(upload.originalname);
+    //También se sanitiza el nombre por si viene con caracteres maliciososo o delicados
+    const originalName = sanitizeFileName(upload.originalname);
+    const extension = getExtension(originalName);
     if (!this.allowedExtensions.includes(extension)) {
       throw new UnsupportedMediaTypeException(
         `Tipo de archivo no permitido. Extensiones permitidas: ${this.allowedExtensions.join(', ')}`,
@@ -60,7 +66,7 @@ export class FilesService {
     //Aquí se persiste la información de file en la BD
     const saved = await this.files.save(
       this.files.create({
-        originalName: upload.originalname,
+        originalName,
         storageKey,
         mimeType,
         sizeBytes: upload.size,

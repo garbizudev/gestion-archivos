@@ -22,3 +22,21 @@ export const FILE_TYPE_CATALOG: Readonly<Record<string, string>> = {
 export function getExtension(fileName: string): string {
   return extname(fileName).slice(1).toLowerCase();
 }
+
+//Función para sanitizar (Como quitar emojis, rutas, caracteres especiales, entre otros)
+export function sanitizeFileName(rawName: string): string {
+  const decoded = Buffer.from(rawName, 'latin1').toString('utf8');
+  const name = decoded.includes('�') ? rawName : decoded;
+
+  const baseName = name.split(/[\\/]/).pop() ?? '';
+
+  const withoutControlChars = [...baseName]
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      return code > 0x1f && code !== 0x7f;
+    })
+    .join('')
+    .trim();
+
+  return withoutControlChars.slice(-255) || 'archivo';
+}
