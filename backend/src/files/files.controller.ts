@@ -1,7 +1,10 @@
 import {
   Controller,
   Get,
+  Param,
+  ParseUUIDPipe,
   Post,
+  StreamableFile,
   UploadedFile,
   UseFilters,
   UseInterceptors,
@@ -12,9 +15,11 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiPayloadTooLargeResponse,
+  ApiProduces,
   ApiTags,
   ApiUnsupportedMediaTypeResponse,
 } from '@nestjs/swagger';
@@ -22,6 +27,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthUser } from '../auth/dto/auth-user.dto';
 import { ReqContext, type RequestContext } from '../common/request-context';
 import { FileResponseDto } from './dto/file-response.dto';
+import { contentDisposition } from './file-types';
 import { FilesService } from './files.service';
 import { FileTooLargeFilter } from './filters/file-too-large.filter';
 
@@ -67,5 +73,30 @@ export class FilesController {
   @ApiOkResponse({ type: [FileResponseDto] })
   list(@CurrentUser() user: AuthUser): Promise<FileResponseDto[]> {
     return this.files.list(user);
+  }
+
+  @Get(':id/download')
+  @ApiOperation({
+    summary: 'Descargar un archivo',
+    description:
+      'Solo si el archivo está dentro del alcance del rol del usuario (las mismas reglas del listado).',
+  })
+  @ApiProduces('application/octet-stream')
+  @ApiOkResponse({ description: 'Contenido del archivo' })
+  @ApiNotFoundResponse({
+    description: 'El archivo no existe o está fuera del alcance del usuario',
+  })
+  async download(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
+    @ReqContext() context: RequestContext,
+  ): Promise<StreamableFile> {
+    const { file, stream } = await this.files.download(user, id, context);
+
+    return new StreamableFile(stream, {
+      type: file.mimeType,
+      length: file.sizeBytes,
+      disposition: contentDisposition(file.originalName),
+    });
   }
 }

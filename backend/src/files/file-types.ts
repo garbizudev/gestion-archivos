@@ -40,3 +40,10 @@ export function sanitizeFileName(rawName: string): string {
 
   return withoutControlChars.slice(-255) || 'archivo';
 }
+
+export function contentDisposition(fileName: string): string {
+  const asciiFallback = fileName
+    .replace(/[^\x20-\x7e]/g, '_')
+    .replace(/["\\]/g, '');
+  return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
+}

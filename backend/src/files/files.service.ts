@@ -2,11 +2,13 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotFoundException,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash, randomUUID } from 'node:crypto';
+import { Readable } from 'node:stream';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { AuditAction } from '../audit/audit-action.enum';
 import { AuditService } from '../audit/audit.service';
@@ -117,11 +119,7 @@ export class FilesService {
 
   //Método para listar los documentos Propios de momento
   async list(user: AuthUser): Promise<FileResponseDto[]> {
-    const query = this.files
-      .createQueryBuilder('file')
-      .innerJoinAndSelect('file.owner', 'owner')
-      .leftJoinAndSelect('file.area', 'area')
-      .orderBy('file.createdAt', 'DESC');
+    const query = this.baseQuery().orderBy('file.createdAt', 'DESC');
 
 
 
@@ -130,6 +128,51 @@ export class FilesService {
 
     const files = await query.getMany();
     return files.map((file) => this.toResponse(file));
+  }
+
+  //función para descargar
+  async download(
+    user: AuthUser,
+    fileId: string,
+    context: RequestContext,
+  ): Promise<{ file: StoredFile; stream: Readable }> {
+    const file = await this.findAccessible(user, fileId);
+    const stream = await this.storage.getStream(file.storageKey);
+
+    //Agregamos la acción de auditoría , para DOWNLOAD para tener trzabilidad de lo que está descargando cierto usuario
+    await this.audit.log({
+      action: AuditAction.DOWNLOAD,
+      actor: user,
+      file,
+      context,
+    });
+
+    return { file, stream };
+  }
+
+  private async findAccessible(
+    user: AuthUser,
+    fileId: string,
+  ): Promise<StoredFile> {
+    const query = this.baseQuery()
+      .addSelect('file.storageKey')
+      .where('file.id = :fileId', { fileId });
+
+      //Aplicamos el scope una vez más para ver si tiene accesibilidad a descargar el archivo , quizá cambia el permiso antes de desaacargar
+    this.applyScope(query, this.policy.visibleScope(user));
+
+    const file = await query.getOne();
+    if (!file) {
+      throw new NotFoundException('Archivo no encontrado');
+    }
+    return file;
+  }
+
+  private baseQuery(): SelectQueryBuilder<StoredFile> {
+    return this.files
+      .createQueryBuilder('file')
+      .innerJoinAndSelect('file.owner', 'owner')
+      .leftJoinAndSelect('file.area', 'area');
   }
 
   private applyScope(
