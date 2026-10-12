@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -20,6 +21,7 @@ import {
 
 @Injectable()
 export class FilesService {
+  private readonly logger = new Logger(FilesService.name);
   private readonly allowedExtensions: string[];
 
   constructor(
@@ -64,19 +66,30 @@ export class FilesService {
     await this.storage.put(storageKey, upload.buffer, mimeType);
 
     //Aquí se persiste la información de file en la BD
-    const saved = await this.files.save(
-      this.files.create({
-        originalName,
-        storageKey,
-        mimeType,
-        sizeBytes: upload.size,
-        checksumSha256: createHash('sha256')
-          .update(upload.buffer)
-          .digest('hex'),
-        ownerId: user.id,
-        areaId: user.areaId,
-      }),
-    );
+    let saved: StoredFile;
+    try {
+      saved = await this.files.save(
+        this.files.create({
+          originalName,
+          storageKey,
+          mimeType,
+          sizeBytes: upload.size,
+          checksumSha256: createHash('sha256')
+            .update(upload.buffer)
+            .digest('hex'),
+          ownerId: user.id,
+          areaId: user.areaId,
+        }),
+      );
+    } catch (error) {
+      await this.storage.delete(storageKey).catch((cleanupError: unknown) =>
+        this.logger.error(
+          `No se pudo eliminar el archivo huérfano ${storageKey}`,
+          cleanupError instanceof Error ? cleanupError.stack : cleanupError,
+        ),
+      );
+      throw error;
+    }
 
     return { //Retornamos la info según el FileResponseDto
       id: saved.id,
