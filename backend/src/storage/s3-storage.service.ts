@@ -5,6 +5,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadBucketCommand,
+  NotFound,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -28,13 +29,23 @@ export class S3StorageService extends StorageService implements OnModuleInit {
       region: s3.region,
       forcePathStyle: s3.forcePathStyle,
       credentials: { accessKeyId: s3.accessKey, secretAccessKey: s3.secretKey },
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     });
   }
 
   async onModuleInit(): Promise<void> {
     try {
       await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
-    } catch {
+      this.logger.log(`Bucket "${this.bucket}" disponible`);
+    } catch (error) {
+      if (!(error instanceof NotFound)) {
+        throw new Error(
+          `No se pudo acceder al bucket "${this.bucket}". Revise S3_ENDPOINT (debe usar https), S3_BUCKET y las credenciales. Detalle: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
       this.logger.log(`Creando bucket "${this.bucket}"`);
       await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
     }
