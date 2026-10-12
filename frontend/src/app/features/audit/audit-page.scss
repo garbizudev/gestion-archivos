@@ -2,117 +2,8 @@
   display: block;
 }
 
-.page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.page-subtitle {
-  margin: 4px 0 0;
-  color: var(--ga-text-secondary);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .action-filter {
   width: 200px;
-}
-
-.card {
-  border-radius: var(--ga-radius-md);
-  border: 1px solid var(--ga-border);
-  background: var(--ga-surface);
-  box-shadow: var(--ga-shadow-sm);
-  overflow: hidden;
-}
-
-.table-wrap {
-  overflow-x: auto;
-  transition: opacity var(--ga-transition);
-}
-
-.table-wrap--loading {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-table {
-  width: 100%;
-  background: transparent;
-}
-
-th.mat-mdc-header-cell {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ga-text-secondary);
-  background: var(--ga-surface-hover);
-}
-
-tr.mat-mdc-row:hover {
-  background: var(--ga-surface-hover);
-}
-
-.nowrap {
-  white-space: nowrap;
-}
-
-.muted {
-  color: var(--ga-text-muted);
-}
-
-.action-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: var(--ga-radius-pill);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  color: var(--ga-text-secondary);
-  background: var(--ga-surface-hover);
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
-
-  &[data-tone='success'] {
-    color: var(--ga-success);
-    background: var(--ga-success-bg);
-  }
-
-  &[data-tone='info'] {
-    color: var(--ga-primary-light);
-    background: var(--ga-primary-bg);
-  }
-
-  &[data-tone='warning'] {
-    color: var(--ga-warning);
-    background: var(--ga-warning-bg);
-  }
-
-  &[data-tone='danger'] {
-    color: var(--ga-error);
-    background: var(--ga-error-bg);
-  }
 }
 
 .actor {
@@ -141,30 +32,6 @@ tr.mat-mdc-row:hover {
 
 .details {
   color: var(--ga-text-secondary);
-}
-
-.state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 56px 24px;
-  color: var(--ga-text-secondary);
-
-  mat-icon {
-    font-size: 40px;
-    width: 40px;
-    height: 40px;
-    color: var(--ga-text-muted);
-  }
-
-  p {
-    margin: 0;
-  }
-}
-
-.state--error mat-icon {
-  color: var(--ga-error);
 }
 
 mat-paginator {

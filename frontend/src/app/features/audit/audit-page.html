@@ -51,7 +51,7 @@
           <th mat-header-cell *matHeaderCellDef>Acción</th>
           <td mat-cell *matCellDef="let log">
             @let info = actionInfo(log.action);
-            <span class="action-badge" [attr.data-tone]="info.tone">
+            <span class="badge" [attr.data-tone]="info.tone">
               <mat-icon>{{ info.icon }}</mat-icon>
               {{ info.label }}
             </span>

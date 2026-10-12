@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.search {
+  width: 280px;
+}
+
+.user-cell {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.user-cell--inactive {
+  opacity: 0.55;
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.user-email {
+  font-size: 12px;
+  color: var(--ga-text-secondary);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

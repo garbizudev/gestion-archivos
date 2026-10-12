@@ -1,0 +1,117 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <mat-dialog-content class="content">
+    @if (errorMessage(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="fullName" autocomplete="off" />
+      @if (form.controls.fullName.hasError('required')) {
+        <mat-error>El nombre es obligatorio.</mat-error>
+      } @else if (form.controls.fullName.hasError('minlength')) {
+        <mat-error>Debe tener al menos 3 caracteres.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="off" />
+      @if (isEdit) {
+        <mat-hint>El correo no se puede modificar.</mat-hint>
+      }
+      @if (form.controls.email.hasError('required')) {
+        <mat-error>El correo es obligatorio.</mat-error>
+      } @else if (form.controls.email.hasError('email')) {
+        <mat-error>Ingrese un correo válido.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ isEdit ? 'Nueva contraseña' : 'Contraseña' }}</mat-label>
+      <input
+        matInput
+        [type]="hidePassword() ? 'password' : 'text'"
+        formControlName="password"
+        autocomplete="new-password"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="hidePassword.set(!hidePassword())"
+        [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+      >
+        <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+      </button>
+      <mat-hint>
+        {{ isEdit ? 'Déjela vacía para mantener la actual. ' : '' }}Mínimo 8 caracteres, con letras y números.
+      </mat-hint>
+      @if (form.controls.password.hasError('required')) {
+        <mat-error>La contraseña es obligatoria.</mat-error>
+      } @else if (form.controls.password.hasError('minlength')) {
+        <mat-error>Debe tener al menos 8 caracteres.</mat-error>
+      } @else if (form.controls.password.hasError('pattern')) {
+        <mat-error>Debe contener letras y números.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="roleCode">
+        @for (role of roles; track role.id) {
+          <mat-option [value]="role.code">{{ role.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Área</mat-label>
+      <mat-select formControlName="areaId">
+        @if (!requiresArea()) {
+          <mat-option [value]="null">Sin área</mat-option>
+        }
+        @for (area of areas; track area.id) {
+          <mat-option [value]="area.id">
+            {{ area.name }}{{ area.isActive ? '' : ' (inactiva)' }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-hint>
+        {{ requiresArea() ? 'Obligatoria para este rol.' : 'Opcional para este rol.' }}
+      </mat-hint>
+      @if (form.controls.areaId.hasError('required')) {
+        <mat-error>Seleccione un área para este rol.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (isManager()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Áreas que gestiona</mat-label>
+        <mat-select formControlName="managedAreaIds" multiple>
+          @for (area of areas; track area.id) {
+            <mat-option [value]="area.id">
+              {{ area.name }}{{ area.isActive ? '' : ' (inactiva)' }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-hint>El gerente ve y gestiona los archivos de estas áreas.</mat-hint>
+      </mat-form-field>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" mat-dialog-close [disabled]="saving()">
+      Cancelar
+    </button>
+    <button mat-flat-button type="submit" [disabled]="saving()">
+      @if (saving()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        {{ isEdit ? 'Guardar cambios' : 'Crear usuario' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

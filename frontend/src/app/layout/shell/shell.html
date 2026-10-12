@@ -15,6 +15,12 @@
       <mat-icon>history</mat-icon>
       <span>Historial</span>
     </a>
+    @if (isAdmin()) {
+      <a class="nav-link" routerLink="/administracion" routerLinkActive="nav-link--active">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Administración</span>
+      </a>
+    }
   </nav>
 
   @if (auth.user(); as user) {

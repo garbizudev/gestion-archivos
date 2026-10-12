@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { RoleCode } from '../../core/models/auth.models';
 
 @Component({
   selector: 'app-shell',
@@ -20,6 +21,10 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class Shell {
   protected readonly auth = inject(AuthService);
+
+  protected readonly isAdmin = computed(
+    () => this.auth.user()?.roleCode === RoleCode.ADMIN,
+  );
 
   protected readonly initials = computed(() =>
     (this.auth.user()?.fullName ?? '')

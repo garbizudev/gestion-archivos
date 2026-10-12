@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/auth/auth.guards';
+import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
 //Sirve para el ruteo de las dizstintas rutas del sistema
 export const routes: Routes = [
   {
@@ -23,6 +23,20 @@ export const routes: Routes = [
         path: 'historial',
         loadComponent: () =>
           import('./features/audit/audit-page').then((m) => m.AuditPage),
+      },
+      {
+        path: 'administracion',
+        canActivate: [adminGuard],
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'usuarios' },
+          {
+            path: 'usuarios',
+            loadComponent: () =>
+              import('./features/admin/users/users-page').then(
+                (m) => m.UsersPage,
+              ),
+          },
+        ],
       },
     ],
   },
