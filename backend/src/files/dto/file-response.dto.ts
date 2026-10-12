@@ -40,4 +40,7 @@ export class FileResponseDto {
 
   @ApiProperty({ type: FileAreaDto, nullable: true })
   area: FileAreaDto | null;
+
+  @ApiProperty({ example: true })
+  canDelete: boolean;
 }

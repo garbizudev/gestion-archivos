@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -114,7 +115,7 @@ export class FilesService {
       relations: { owner: true, area: true },
     });
 
-    return this.toResponse(created); //Retornamos la info según el FileResponseDto
+    return this.toResponse(created, user); //Retornamos la info según el FileResponseDto
   }
 
   //Método para listar los documentos Propios de momento
@@ -127,7 +128,7 @@ export class FilesService {
     this.applyScope(query, this.policy.visibleScope(user));
 
     const files = await query.getMany();
-    return files.map((file) => this.toResponse(file));
+    return files.map((file) => this.toResponse(file, user));
   }
 
   //función para descargar
@@ -148,6 +149,37 @@ export class FilesService {
     });
 
     return { file, stream };
+  }
+
+
+  //Función para eliminar archivos
+  async remove(
+    user: AuthUser,
+    fileId: string,
+    context: RequestContext,
+  ): Promise<void> {
+    const file = await this.findAccessible(user, fileId);
+
+    //Validamos los permisos de eliminación nuevamente
+    if (!this.policy.canDelete(user, file)) {
+      throw new ForbiddenException(
+        'No tiene permiso para eliminar este archivo',
+      );
+    }
+
+    //Actualizamos la información del archivo, como tal no eliminamos nada de la bd ni del disco, deletedat actua como la bandera lógica para identificar si se elimina o no, por si deseamos conservar cualqueir archivo que subimos, por si acaso
+    await this.files.update(file.id, {
+      deletedAt: new Date(),
+      deletedById: user.id,
+    });
+
+    //Auditmos la eliminación con un DELETE
+    await this.audit.log({
+      action: AuditAction.DELETE,
+      actor: user,
+      file,
+      context,
+    });
   }
 
   private async findAccessible(
@@ -197,7 +229,7 @@ export class FilesService {
     );
   }
 
-  private toResponse(file: StoredFile): FileResponseDto {
+  private toResponse(file: StoredFile, user: AuthUser): FileResponseDto {
     return {
       id: file.id,
       originalName: file.originalName,
@@ -210,6 +242,7 @@ export class FilesService {
         email: file.owner.email,
       },
       area: file.area ? { id: file.area.id, name: file.area.name } : null,
+      canDelete: this.policy.canDelete(user, file),
     };
   }
 }

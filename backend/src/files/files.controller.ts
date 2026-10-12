@@ -1,6 +1,8 @@
 import {
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Post,
@@ -15,6 +17,8 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -98,5 +102,28 @@ export class FilesController {
       length: file.sizeBytes,
       disposition: contentDisposition(file.originalName),
     });
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Eliminar un archivo (borrado lógico)',
+    description:
+      'Estándar y jefe de área: solo los propios. Gerente: los propios y los de las áreas que gestiona. Administrador: cualquiera.',
+  })
+  @ApiNoContentResponse({ description: 'Archivo eliminado' })
+  @ApiForbiddenResponse({
+    description:
+      'El usuario ve el archivo, pero no tiene permiso para eliminarlo',
+  })
+  @ApiNotFoundResponse({
+    description: 'El archivo no existe o está fuera del alcance del usuario',
+  })
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
+    @ReqContext() context: RequestContext,
+  ): Promise<void> {
+    return this.files.remove(user, id, context);
   }
 }
