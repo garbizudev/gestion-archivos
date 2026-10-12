@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import configuration, { AppConfig } from './config/configuration';
 import { buildTypeOrmOptions } from './database/typeorm.options';
 import { FilesModule } from './files/files.module';
+import { RolesModule } from './roles/roles.module';
+import { UsersModule } from './users/users.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
@@ -27,6 +29,8 @@ import { StorageModule } from './storage/storage.module';
     AuthModule,
     FilesModule,
     AreasModule,
+    RolesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
