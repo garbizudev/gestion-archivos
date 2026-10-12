@@ -26,6 +26,10 @@ export class FilesService {
       );
     }
 
+    if (upload.size === 0) {
+      throw new BadRequestException('El archivo está vacío');
+    }
+
     const storageKey = randomUUID(); //Generamos un identificador aleatorio
 
     await this.storage.put(storageKey, upload.buffer, upload.mimetype);

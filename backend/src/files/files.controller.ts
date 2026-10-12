@@ -11,6 +11,7 @@ import {
   ApiConsumes,
   ApiCreatedResponse,
   ApiOperation,
+  ApiPayloadTooLargeResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -36,6 +37,9 @@ export class FilesController {
     },
   })
   @ApiCreatedResponse({ type: FileResponseDto })
+  @ApiPayloadTooLargeResponse({
+    description: 'El archivo supera el tamaño máximo permitido',
+  })
   upload(
     @UploadedFile() file: Express.Multer.File | undefined,
     @CurrentUser() user: AuthUser,
