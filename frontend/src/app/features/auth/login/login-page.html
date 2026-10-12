@@ -1,0 +1,81 @@
+<div class="login-page">
+  <div class="bg-ring bg-ring--primary-tl"></div>
+  <div class="bg-ring bg-ring--primary-tr"></div>
+  <div class="bg-ring bg-ring--accent-br"></div>
+  <div class="bg-ring bg-ring--accent-bl"></div>
+
+  <div class="login-card">
+    <div class="card-brand">
+      <div class="brand-content">
+        <div class="brand-mark">
+          <mat-icon>folder_shared</mat-icon>
+        </div>
+        <h1 class="brand-title">Gestión de Archivos</h1>
+        <p class="brand-subtitle">Plataforma segura por usuario, rol y área</p>
+      </div>
+    </div>
+
+    <div class="card-form">
+      <h2 class="form-title">Iniciar sesión</h2>
+      <p class="form-subtitle">Ingrese sus credenciales para continuar</p>
+
+      @if (sessionExpired) {
+        <p class="form-notice">Su sesión expiró. Inicie sesión nuevamente.</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field-wrap">
+          <mat-icon class="field-icon">mail</mat-icon>
+          <input
+            class="login-input"
+            type="email"
+            placeholder="Correo electrónico"
+            formControlName="email"
+            autocomplete="username"
+          />
+        </div>
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <p class="field-error">Ingrese un correo electrónico válido.</p>
+        }
+
+        <div class="field-wrap">
+          <mat-icon class="field-icon">lock</mat-icon>
+          <input
+            class="login-input login-input--password"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Contraseña"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="eye-btn"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="field-error">Ingrese su contraseña.</p>
+        }
+
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        <button class="submit-btn" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Ingresar
+          }
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="login-footer">
+    <span>Plataforma de gestión segura de archivos</span>
+  </footer>
+</div>
