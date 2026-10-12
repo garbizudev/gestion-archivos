@@ -1,8 +1,13 @@
-import { HttpClient, HttpEvent } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { FileItem, UploadRules } from '../../core/models/file.models';
+import {
+  FileItem,
+  FileListPage,
+  FileQuery,
+  UploadRules,
+} from '../../core/models/file.models';
 
 @Injectable({ providedIn: 'root' })
 export class FilesService {
@@ -10,8 +15,14 @@ export class FilesService {
   private readonly baseUrl = `${environment.apiUrl}/files`;
 
   //List es el método para imprimir los archivos
-  list(): Observable<FileItem[]> {
-    return this.http.get<FileItem[]>(this.baseUrl);
+  list(query: FileQuery): Observable<FileListPage> {
+    let params = new HttpParams()
+      .set('page', query.page)
+      .set('limit', query.limit);
+    if (query.search) {
+      params = params.set('search', query.search);
+    }
+    return this.http.get<FileListPage>(this.baseUrl, { params });
   }
 
   //Descarga de archivo

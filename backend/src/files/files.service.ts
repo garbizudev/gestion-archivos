@@ -17,7 +17,11 @@ import { AuthUser } from '../auth/auth-user';
 import { RequestContext } from '../common/request-context';
 import { AppConfig } from '../config/configuration';
 import { StorageService } from '../storage/storage.service';
-import { FileResponseDto } from './dto/file-response.dto';
+import {
+  FileListResponseDto,
+  FileResponseDto,
+} from './dto/file-response.dto';
+import { ListFilesQueryDto } from './dto/list-files-query.dto';
 import { UploadRulesDto } from './dto/upload-rules.dto';
 import { StoredFile } from './entities/stored-file.entity';
 import { FilePolicy, FileScope } from './file.policy';
@@ -129,16 +133,32 @@ export class FilesService {
   }
 
   //Método para listar los documentos Propios de momento
-  async list(user: AuthUser): Promise<FileResponseDto[]> {
-    const query = this.baseQuery().orderBy('file.createdAt', 'DESC');
-
-
+  async list(
+    user: AuthUser,
+    filters: ListFilesQueryDto,
+  ): Promise<FileListResponseDto> {
+    const query = this.baseQuery()
+      .orderBy('file.createdAt', 'DESC')
+      .addOrderBy('file.id', 'DESC')
+      .skip((filters.page - 1) * filters.limit)
+      .take(filters.limit);
 
     //Aplicamos el scope y enviamos el usuario como parametro, el usuario contiene data del rol entonces ya podemos ir haciendo filtros
     this.applyScope(query, this.policy.visibleScope(user));
 
-    const files = await query.getMany();
-    return files.map((file) => this.toResponse(file, user));
+    if (filters.search) {
+      query.andWhere("file.originalName ILIKE :search ESCAPE '\\'", {
+        search: `%${escapeLike(filters.search)}%`,
+      });
+    }
+
+    const [files, total] = await query.getManyAndCount();
+    return {
+      items: files.map((file) => this.toResponse(file, user)),
+      total,
+      page: filters.page,
+      limit: filters.limit,
+    };
   }
 
   //función para descargar
@@ -255,4 +275,8 @@ export class FilesService {
       canDelete: this.policy.canDelete(user, file),
     };
   }
+}
+
+function escapeLike(value: string): string {
+  return value.replace(/[\%_]/g, (char) => `\${char}`);
 }

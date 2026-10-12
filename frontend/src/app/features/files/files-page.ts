@@ -1,16 +1,24 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { RoleCode } from '../../core/models/auth.models';
-import { FileItem, UploadRules } from '../../core/models/file.models';
+import {
+  FileItem,
+  FileQuery,
+  UploadRules,
+} from '../../core/models/file.models';
 import { NotificationService } from '../../core/ui/notification.service';
 import {
   ConfirmDialog,
@@ -20,6 +28,7 @@ import { FileIconPipe } from '../../shared/pipes/file-icon.pipe';
 import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
 import { getApiErrorMessage } from '../../shared/utils/http-error';
 import { saveBlob } from '../../shared/utils/save-blob';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { FilesService } from './files.service';
 
 @Component({
@@ -27,7 +36,10 @@ import { FilesService } from './files.service';
   imports: [
     DatePipe,
     MatButtonModule,
+    MatFormFieldModule,
     MatIconModule,
+    MatInputModule,
+    MatPaginatorModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatTableModule,
@@ -75,8 +87,22 @@ export class FilesPage implements OnInit {
 
   private readonly fileSize = new FileSizePipe();
   protected readonly files = signal<FileItem[]>([]);
+  protected readonly total = signal(0);
+  protected readonly query = signal<FileQuery>({ page: 1, limit: 10, search: '' });
+  protected readonly pageSizeOptions = [10, 20, 50];
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
+
+  private readonly searchTerms = new Subject<string>();
+
+  constructor() {
+    this.searchTerms
+      .pipe(debounceTime(350), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe((search) => {
+        this.query.update((query) => ({ ...query, search, page: 1 }));
+        this.load();
+      });
+  }
 
   protected readonly scopeDescription = computed(() => {
     const user = this.auth.user();
@@ -160,9 +186,9 @@ export class FilesPage implements OnInit {
         } else if (event.type === HttpEventType.Response && event.body) {
           const created = event.body;
           this.uploading.set(null);
-          this.error.set(false);
-          this.files.update((files) => [created, ...files]);
           this.notifications.success(`Se cargó "${created.originalName}".`);
+          this.query.update((query) => ({ ...query, page: 1 }));
+          this.load();
         }
       },
       error: (error: unknown) => {
@@ -179,9 +205,10 @@ export class FilesPage implements OnInit {
     this.error.set(false);
 
     //Este proceso de listar arhcvos se carga en el inicio de la operación
-    this.filesService.list().subscribe({
-      next: (files) => {
-        this.files.set(files);
+    this.filesService.list(this.query()).subscribe({
+      next: (page) => {
+        this.files.set(page.items);
+        this.total.set(page.total);
         this.loading.set(false);
       },
       error: () => {
@@ -244,8 +271,11 @@ export class FilesPage implements OnInit {
     this.filesService.remove(file.id).subscribe({
       next: () => {
         this.deletingId.set(null);
-        this.files.update((files) => files.filter((item) => item.id !== file.id));
         this.notifications.success(`Se eliminó "${file.originalName}".`);
+        if (this.files().length === 1 && this.query().page > 1) {
+          this.query.update((query) => ({ ...query, page: query.page - 1 }));
+        }
+        this.load();
       },
       error: (error: unknown) => {
         this.deletingId.set(null);
@@ -257,6 +287,19 @@ export class FilesPage implements OnInit {
         }
       },
     });
+  }
+
+  protected onSearch(event: Event): void {
+    this.searchTerms.next((event.target as HTMLInputElement).value.trim());
+  }
+
+  protected onPageChange(event: PageEvent): void {
+    this.query.update((query) => ({
+      ...query,
+      page: event.pageIndex + 1,
+      limit: event.pageSize,
+    }));
+    this.load();
   }
 
   protected isMine(file: FileItem): boolean {

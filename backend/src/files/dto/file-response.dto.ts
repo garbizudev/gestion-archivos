@@ -44,3 +44,17 @@ export class FileResponseDto {
   @ApiProperty({ example: true })
   canDelete: boolean;
 }
+
+export class FileListResponseDto {
+  @ApiProperty({ type: [FileResponseDto] })
+  items: FileResponseDto[];
+
+  @ApiProperty({ example: 42 })
+  total: number;
+
+  @ApiProperty({ example: 1 })
+  page: number;
+
+  @ApiProperty({ example: 10 })
+  limit: number;
+}

@@ -17,6 +17,19 @@ export interface FileItem {
   canDelete: boolean;
 }
 
+export interface FileListPage {
+  items: FileItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface FileQuery {
+  page: number;
+  limit: number;
+  search: string;
+}
+
 export interface UploadRules {
   maxUploadBytes: number;
   allowedExtensions: string[];

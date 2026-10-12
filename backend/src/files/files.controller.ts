@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   StreamableFile,
   UploadedFile,
   UseFilters,
@@ -30,7 +31,8 @@ import {
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthUser } from '../auth/dto/auth-user.dto';
 import { ReqContext, type RequestContext } from '../common/request-context';
-import { FileResponseDto } from './dto/file-response.dto';
+import { FileListResponseDto, FileResponseDto } from './dto/file-response.dto';
+import { ListFilesQueryDto } from './dto/list-files-query.dto';
 import { UploadRulesDto } from './dto/upload-rules.dto';
 import { contentDisposition } from './file-types';
 import { FilesService } from './files.service';
@@ -75,9 +77,12 @@ export class FilesController {
     description:
       'Devuelve los archivos visibles según el rol: estándar (propios), jefe de área (propios y de su área), gerente (propios y de las áreas que gestiona), administrador (todos).',
   })
-  @ApiOkResponse({ type: [FileResponseDto] })
-  list(@CurrentUser() user: AuthUser): Promise<FileResponseDto[]> {
-    return this.files.list(user);
+  @ApiOkResponse({ type: FileListResponseDto })
+  list(
+    @Query() query: ListFilesQueryDto,
+    @CurrentUser() user: AuthUser,
+  ): Promise<FileListResponseDto> {
+    return this.files.list(user, query);
   }
 
   @Get('upload-rules')

@@ -4,6 +4,10 @@
     <p class="page-subtitle">{{ scopeDescription() }}</p>
   </div>
   <div class="header-actions">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar por nombre" (input)="onSearch($event)" />
+    </mat-form-field>
     <button mat-stroked-button (click)="load()" [disabled]="loading()">
       <mat-icon>refresh</mat-icon>
       Actualizar
@@ -47,7 +51,7 @@
 }
 
 <section class="card">
-  @if (loading()) {
+  @if (loading() && files().length === 0) {
     <div class="state">
       <mat-spinner diameter="36" />
       <p>Cargando archivos…</p>
@@ -61,10 +65,12 @@
   } @else if (files().length === 0) {
     <div class="state">
       <mat-icon>folder_open</mat-icon>
-      <p>No hay archivos para mostrar.</p>
+      <p>
+        {{ query().search ? 'Ningún archivo coincide con "' + query().search + '".' : 'No hay archivos para mostrar.' }}
+      </p>
     </div>
   } @else {
-    <div class="table-wrap">
+    <div class="table-wrap" [class.table-wrap--loading]="loading()">
       <table mat-table [dataSource]="files()">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Nombre</th>
@@ -162,6 +168,17 @@
       </table>
     </div>
 
-    <p class="table-footer">{{ files().length }} archivo(s)</p>
+  }
+
+  @if (!error() && total() > 0) {
+    <mat-paginator
+      [length]="total()"
+      [pageIndex]="query().page - 1"
+      [pageSize]="query().limit"
+      [pageSizeOptions]="pageSizeOptions"
+      [disabled]="loading()"
+      showFirstLastButtons
+      (page)="onPageChange($event)"
+    />
   }
 </section>
