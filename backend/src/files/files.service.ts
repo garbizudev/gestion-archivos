@@ -105,12 +105,38 @@ export class FilesService {
       details: { sizeBytes: saved.sizeBytes, mimeType: saved.mimeType },
     });
 
-    return { //Retornamos la info según el FileResponseDto
-      id: saved.id,
-      originalName: saved.originalName,
-      mimeType: saved.mimeType,
-      sizeBytes: saved.sizeBytes,
-      createdAt: saved.createdAt,
+    const created = await this.files.findOneOrFail({
+      where: { id: saved.id },
+      relations: { owner: true, area: true },
+    });
+
+    return this.toResponse(created); //Retornamos la info según el FileResponseDto
+  }
+
+  //Método para listar los documentos Propios de momento
+  async list(user: AuthUser): Promise<FileResponseDto[]> {
+    const files = await this.files.find({
+      where: { ownerId: user.id },
+      relations: { owner: true, area: true },
+      order: { createdAt: 'DESC' },
+    });
+
+    return files.map((file) => this.toResponse(file));
+  }
+
+  private toResponse(file: StoredFile): FileResponseDto {
+    return {
+      id: file.id,
+      originalName: file.originalName,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+      createdAt: file.createdAt,
+      owner: {
+        id: file.owner.id,
+        fullName: file.owner.fullName,
+        email: file.owner.email,
+      },
+      area: file.area ? { id: file.area.id, name: file.area.name } : null,
     };
   }
 }

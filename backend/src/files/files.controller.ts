@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseFilters,
@@ -11,6 +12,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiPayloadTooLargeResponse,
   ApiTags,
@@ -54,5 +56,12 @@ export class FilesController {
     @ReqContext() context: RequestContext,
   ): Promise<FileResponseDto> {
     return this.files.upload(user, file, context);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Listar mis archivos' })
+  @ApiOkResponse({ type: [FileResponseDto] })
+  list(@CurrentUser() user: AuthUser): Promise<FileResponseDto[]> {
+    return this.files.list(user);
   }
 }
