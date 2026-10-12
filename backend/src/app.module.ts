@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
+import { AreasModule } from './areas/areas.module';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import configuration, { AppConfig } from './config/configuration';
@@ -19,12 +20,13 @@ import { StorageModule } from './storage/storage.module';
       useFactory: (config: ConfigService<AppConfig, true>) =>
         buildTypeOrmOptions(config.get('db', { infer: true })),
     }),
-    
+
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     StorageModule,
     AuditModule,
     AuthModule,
     FilesModule,
+    AreasModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
