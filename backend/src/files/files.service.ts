@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash, randomUUID } from 'node:crypto';
-import { Repository } from 'typeorm';
+import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { AuditAction } from '../audit/audit-action.enum';
 import { AuditService } from '../audit/audit.service';
 import { AuthUser } from '../auth/auth-user';
@@ -16,6 +16,7 @@ import { AppConfig } from '../config/configuration';
 import { StorageService } from '../storage/storage.service';
 import { FileResponseDto } from './dto/file-response.dto';
 import { StoredFile } from './entities/stored-file.entity';
+import { FilePolicy, FileScope } from './file.policy';
 import {
   FILE_TYPE_CATALOG,
   getExtension,
@@ -32,6 +33,7 @@ export class FilesService {
     private readonly files: Repository<StoredFile>,
     private readonly storage: StorageService,
     private readonly audit: AuditService,
+    private readonly policy: FilePolicy,
     config: ConfigService<AppConfig, true>,
   ) {
     this.allowedExtensions = config.get('files.allowedExtensions', {
@@ -115,13 +117,41 @@ export class FilesService {
 
   //Método para listar los documentos Propios de momento
   async list(user: AuthUser): Promise<FileResponseDto[]> {
-    const files = await this.files.find({
-      where: { ownerId: user.id },
-      relations: { owner: true, area: true },
-      order: { createdAt: 'DESC' },
-    });
+    const query = this.files
+      .createQueryBuilder('file')
+      .innerJoinAndSelect('file.owner', 'owner')
+      .leftJoinAndSelect('file.area', 'area')
+      .orderBy('file.createdAt', 'DESC');
 
+
+
+    //Aplicamos el scope y enviamos el usuario como parametro, el usuario contiene data del rol entonces ya podemos ir haciendo filtros
+    this.applyScope(query, this.policy.visibleScope(user));
+
+    const files = await query.getMany();
     return files.map((file) => this.toResponse(file));
+  }
+
+  private applyScope(
+    query: SelectQueryBuilder<StoredFile>,
+    scope: FileScope,
+  ): void {
+    if (scope.all) {
+      return;
+    }
+
+    query.andWhere(
+      new Brackets((where) => {
+        where.where('file.ownerId = :scopeOwnerId', {
+          scopeOwnerId: scope.ownerId,
+        });
+        if (scope.areaIds.length > 0) {
+          where.orWhere('file.areaId IN (:...scopeAreaIds)', {
+            scopeAreaIds: scope.areaIds,
+          });
+        }
+      }),
+    );
   }
 
   private toResponse(file: StoredFile): FileResponseDto {

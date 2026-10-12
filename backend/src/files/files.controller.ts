@@ -59,7 +59,11 @@ export class FilesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar mis archivos' })
+  @ApiOperation({
+    summary: 'Listar archivos',
+    description:
+      'Devuelve los archivos visibles según el rol: estándar (propios), jefe de área (propios y de su área), gerente (propios y de las áreas que gestiona), administrador (todos).',
+  })
   @ApiOkResponse({ type: [FileResponseDto] })
   list(@CurrentUser() user: AuthUser): Promise<FileResponseDto[]> {
     return this.files.list(user);

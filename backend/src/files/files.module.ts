@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditModule } from '../audit/audit.module';
 import { AppConfig } from '../config/configuration';
 import { StoredFile } from './entities/stored-file.entity';
+import { FilePolicy } from './file.policy';
 import { FilesController } from './files.controller';
 import { FilesService } from './files.service';
 
@@ -23,6 +24,6 @@ import { FilesService } from './files.service';
     }),
   ],
   controllers: [FilesController],
-  providers: [FilesService],
+  providers: [FilesService, FilePolicy],
 })
 export class FilesModule {}
