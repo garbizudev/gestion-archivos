@@ -20,4 +20,9 @@ export class FilesService {
       responseType: 'blob',
     });
   }
+
+  //Servicio de eliminación
+  remove(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
 }

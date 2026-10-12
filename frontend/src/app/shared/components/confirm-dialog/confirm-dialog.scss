@@ -1,0 +1,66 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 420px;
+  padding: 28px 28px 24px;
+  text-align: center;
+}
+
+.dialog-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ga-primary-light);
+  background: var(--ga-primary-bg);
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.dialog-icon--danger {
+  color: var(--ga-error);
+  background: var(--ga-error-bg);
+}
+
+.dialog-title {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ga-text-primary);
+}
+
+.dialog-message {
+  margin: 0;
+  color: var(--ga-text-secondary);
+}
+
+.dialog-detail {
+  margin: 12px 0 0;
+  padding: 8px 14px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: var(--ga-radius-sm);
+  font-weight: 600;
+  color: var(--ga-text-primary);
+  background: var(--ga-surface-hover);
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-danger {
+  --mat-button-filled-container-color: var(--ga-error);
+  --mat-button-filled-label-text-color: #ffffff;
+}

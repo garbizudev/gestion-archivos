@@ -98,6 +98,25 @@
                 <mat-icon>download</mat-icon>
               </button>
             }
+
+            @if (file.canDelete) {
+              @if (deletingId() === file.id) {
+                <span class="action-spinner">
+                  <mat-spinner diameter="20" />
+                </span>
+              } @else {
+                <button
+                  mat-icon-button
+                  class="btn-delete"
+                  matTooltip="Eliminar"
+                  [attr.aria-label]="'Eliminar ' + file.originalName"
+                  [disabled]="deletingId() !== null"
+                  (click)="confirmRemove(file)"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              }
+            }
           </td>
         </ng-container>
 

@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
@@ -10,8 +11,13 @@ import { AuthService } from '../../core/auth/auth.service';
 import { RoleCode } from '../../core/models/auth.models';
 import { FileItem } from '../../core/models/file.models';
 import { NotificationService } from '../../core/ui/notification.service';
+import {
+  ConfirmDialog,
+  ConfirmDialogData,
+} from '../../shared/components/confirm-dialog/confirm-dialog';
 import { FileIconPipe } from '../../shared/pipes/file-icon.pipe';
 import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
+import { getApiErrorMessage } from '../../shared/utils/http-error';
 import { saveBlob } from '../../shared/utils/save-blob';
 import { FilesService } from './files.service';
 
@@ -33,6 +39,7 @@ import { FilesService } from './files.service';
 export class FilesPage implements OnInit {
   private readonly filesService = inject(FilesService);
   private readonly notifications = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
   protected readonly auth = inject(AuthService);
 
   protected readonly columns = [
@@ -44,6 +51,7 @@ export class FilesPage implements OnInit {
     'actions',
   ];
   protected readonly downloadingId = signal<string | null>(null);
+  protected readonly deletingId = signal<string | null>(null);
   protected readonly files = signal<FileItem[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
@@ -110,6 +118,48 @@ export class FilesPage implements OnInit {
           this.load();
         } else {
           this.notifications.error('No se pudo descargar el archivo.');
+        }
+      },
+    });
+  }
+
+  //Confirmación de eliminación
+  protected confirmRemove(file: FileItem): void {
+    const data: ConfirmDialogData = {
+      title: '¿Eliminar archivo?',
+      message: 'El archivo dejará de estar disponible para todos los usuarios.',
+      detail: file.originalName,
+      confirmText: 'Eliminar',
+      tone: 'danger',
+    };
+
+    this.dialog
+      .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, { data })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.remove(file); //Primero se consulta y luego se elimina
+        }
+      });
+  }
+
+  //Proceso de eliminar
+  private remove(file: FileItem): void {
+    this.deletingId.set(file.id);
+
+    this.filesService.remove(file.id).subscribe({
+      next: () => {
+        this.deletingId.set(null);
+        this.files.update((files) => files.filter((item) => item.id !== file.id));
+        this.notifications.success(`Se eliminó "${file.originalName}".`);
+      },
+      error: (error: unknown) => {
+        this.deletingId.set(null);
+        this.notifications.error(
+          getApiErrorMessage(error, 'No se pudo eliminar el archivo.'),
+        );
+        if (error instanceof HttpErrorResponse && error.status === 404) {
+          this.load();
         }
       },
     });
