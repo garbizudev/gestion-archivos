@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   UploadedFile,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,6 +19,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthUser } from '../auth/dto/auth-user.dto';
 import { FileResponseDto } from './dto/file-response.dto';
 import { FilesService } from './files.service';
+import { FileTooLargeFilter } from './filters/file-too-large.filter';
 
 @ApiTags('Archivos')
 @ApiBearerAuth()
@@ -27,6 +29,7 @@ export class FilesController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @UseFilters(FileTooLargeFilter)
   @ApiOperation({ summary: 'Cargar un archivo' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
