@@ -27,6 +27,8 @@ export const routes: Routes = [
       {
         path: 'administracion',
         canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/admin/admin-layout').then((m) => m.AdminLayout),
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'usuarios' },
           {
@@ -34,6 +36,13 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/admin/users/users-page').then(
                 (m) => m.UsersPage,
+              ),
+          },
+          {
+            path: 'areas',
+            loadComponent: () =>
+              import('./features/admin/areas/areas-page').then(
+                (m) => m.AreasPage,
               ),
           },
         ],

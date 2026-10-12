@@ -42,6 +42,13 @@ export type UpdateUserRequest = Partial<
   Omit<CreateUserRequest, 'email'> & { isActive: boolean }
 >;
 
+export interface CreateAreaRequest {
+  name: string;
+  description?: string;
+}
+
+export type UpdateAreaRequest = Partial<CreateAreaRequest & { isActive: boolean }>;
+
 export const ROLES_REQUIRING_AREA: readonly RoleCode[] = [
   RoleCode.STANDARD,
   RoleCode.AREA_HEAD,

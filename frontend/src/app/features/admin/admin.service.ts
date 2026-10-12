@@ -5,8 +5,10 @@ import { environment } from '../../../environments/environment';
 import {
   AdminArea,
   AdminUser,
+  CreateAreaRequest,
   CreateUserRequest,
   RoleOption,
+  UpdateAreaRequest,
   UpdateUserRequest,
 } from '../../core/models/admin.models';
 
@@ -33,5 +35,13 @@ export class AdminService {
 
   listAreas(): Observable<AdminArea[]> {
     return this.http.get<AdminArea[]>(`${this.apiUrl}/areas`);
+  }
+
+  createArea(body: CreateAreaRequest): Observable<AdminArea> {
+    return this.http.post<AdminArea>(`${this.apiUrl}/areas`, body);
+  }
+
+  updateArea(id: string, body: UpdateAreaRequest): Observable<AdminArea> {
+    return this.http.patch<AdminArea>(`${this.apiUrl}/areas/${id}`, body);
   }
 }
