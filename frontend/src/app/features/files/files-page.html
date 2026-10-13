@@ -12,21 +12,23 @@
       <mat-icon>refresh</mat-icon>
       Actualizar
     </button>
-    <button
-      mat-flat-button
-      (click)="fileInput.click()"
-      [disabled]="uploading() !== null"
-    >
-      <mat-icon>upload</mat-icon>
-      Subir archivo
-    </button>
-    <input
-      #fileInput
-      type="file"
-      hidden
-      [accept]="acceptedTypes()"
-      (change)="onFileSelected($event)"
-    />
+    @if (canUpload()) {
+      <button
+        mat-flat-button
+        (click)="fileInput.click()"
+        [disabled]="uploading() !== null"
+      >
+        <mat-icon>upload</mat-icon>
+        Subir archivo
+      </button>
+      <input
+        #fileInput
+        type="file"
+        hidden
+        [accept]="acceptedTypes()"
+        (change)="onFileSelected($event)"
+      />
+    }
   </div>
 </header>
 

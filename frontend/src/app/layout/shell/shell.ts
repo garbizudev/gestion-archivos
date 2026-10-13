@@ -26,6 +26,11 @@ export class Shell {
     () => this.auth.user()?.roleCode === RoleCode.ADMIN,
   );
 
+  protected readonly canSeeHistory = computed(() => {
+    const role = this.auth.user()?.roleCode;
+    return role === RoleCode.MANAGER || role === RoleCode.ADMIN;
+  });
+
   protected readonly initials = computed(() =>
     (this.auth.user()?.fullName ?? '')
       .split(' ')

@@ -13,10 +13,14 @@ export const guestGuard: CanActivateFn = () => {
   return !auth.isAuthenticated() || inject(Router).createUrlTree(['/']);
 };
 
-export const adminGuard: CanActivateFn = () => {
-  const auth = inject(AuthService);
-  return (
-    auth.user()?.roleCode === RoleCode.ADMIN ||
-    inject(Router).createUrlTree(['/archivos'])
-  );
-};
+export function roleGuard(...roles: RoleCode[]): CanActivateFn {
+  return () => {
+    const role = inject(AuthService).user()?.roleCode;
+    return (
+      (role !== undefined && roles.includes(role)) ||
+      inject(Router).createUrlTree(['/archivos'])
+    );
+  };
+}
+
+export const adminGuard: CanActivateFn = roleGuard(RoleCode.ADMIN);

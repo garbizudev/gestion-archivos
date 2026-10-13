@@ -29,14 +29,22 @@ import {
   ApiUnsupportedMediaTypeResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthUser } from '../auth/dto/auth-user.dto';
 import { ReqContext, type RequestContext } from '../common/request-context';
+import { RoleCode } from '../roles/role-code.enum';
 import { FileListResponseDto, FileResponseDto } from './dto/file-response.dto';
 import { ListFilesQueryDto } from './dto/list-files-query.dto';
 import { UploadRulesDto } from './dto/upload-rules.dto';
 import { contentDisposition } from './file-types';
 import { FilesService } from './files.service';
 import { FileTooLargeFilter } from './filters/file-too-large.filter';
+
+const UPLOADER_ROLES = [
+  RoleCode.STANDARD,
+  RoleCode.AREA_HEAD,
+  RoleCode.MANAGER,
+];
 
 @ApiTags('Archivos')
 @ApiBearerAuth()
@@ -45,9 +53,15 @@ export class FilesController {
   constructor(private readonly files: FilesService) {}
 
   @Post()
+  @Roles(...UPLOADER_ROLES)
   @UseInterceptors(FileInterceptor('file'))
   @UseFilters(FileTooLargeFilter)
-  @ApiOperation({ summary: 'Cargar un archivo' })
+  @ApiOperation({
+    summary: 'Cargar un archivo',
+    description:
+      'Disponible para usuario estándar, jefe de área y gerente. El administrador no carga archivos.',
+  })
+  @ApiForbiddenResponse({ description: 'El rol no puede cargar archivos' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -86,6 +100,7 @@ export class FilesController {
   }
 
   @Get('upload-rules')
+  @Roles(...UPLOADER_ROLES)
   @ApiOperation({
     summary: 'Reglas de carga',
     description:

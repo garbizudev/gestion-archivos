@@ -1,5 +1,11 @@
 import { Routes } from '@angular/router';
-import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
+import {
+  adminGuard,
+  authGuard,
+  guestGuard,
+  roleGuard,
+} from './core/auth/auth.guards';
+import { RoleCode } from './core/models/auth.models';
 //Sirve para el ruteo de las dizstintas rutas del sistema
 export const routes: Routes = [
   {
@@ -21,6 +27,7 @@ export const routes: Routes = [
       },
       {
         path: 'historial',
+        canActivate: [roleGuard(RoleCode.MANAGER, RoleCode.ADMIN)],
         loadComponent: () =>
           import('./features/audit/audit-page').then((m) => m.AuditPage),
       },

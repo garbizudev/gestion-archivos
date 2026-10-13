@@ -124,12 +124,18 @@ export class FilesPage implements OnInit {
     }
   });
 
+  protected readonly canUpload = computed(
+    () => this.auth.user()?.roleCode !== RoleCode.ADMIN,
+  );
+
   ngOnInit(): void {
     this.load();
-    this.filesService.uploadRules().subscribe({
-      next: (rules) => this.uploadRules.set(rules),
-      error: () => this.uploadRules.set(null),
-    });
+    if (this.canUpload()) {
+      this.filesService.uploadRules().subscribe({
+        next: (rules) => this.uploadRules.set(rules),
+        error: () => this.uploadRules.set(null),
+      });
+    }
   }
 
   protected onFileSelected(event: Event): void {
