@@ -1,1 +1,58 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@use './styles/palette';
+@use './styles/shared';
+
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$blue-palette,
+        tertiary: mat.$magenta-palette,
+      ),
+      typography: Inter,
+      density: 0,
+    )
+  );
+
+  --mat-sys-primary: var(--ga-primary);
+  --mat-sys-on-primary: var(--ga-text-on-primary);
+  --mat-sys-tertiary: var(--ga-accent);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ga-font);
+  font-size: var(--ga-fs-base);
+  color: var(--ga-text-primary);
+  background: var(--ga-bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.mat-icon {
+  font-family: 'Material Icons Outlined';
+}
+
+.ga-snackbar--success {
+  --mat-snack-bar-container-color: var(--ga-success);
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
+
+.ga-snackbar--error {
+  --mat-snack-bar-container-color: var(--ga-error);
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}

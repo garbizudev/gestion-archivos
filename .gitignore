@@ -4,10 +4,9 @@ dist/
 .angular/
 coverage/
 
-# Variables de entorno (solo se versionan los .env.example)
+# Variables de entorno: ninguna se versiona (ver "Variables de entorno" en README.md)
 .env
 .env.*
-!.env.example
 
 # Almacenamiento local de archivos (driver "local")
 backend/storage/

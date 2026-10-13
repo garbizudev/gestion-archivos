@@ -1,0 +1,184 @@
+<header class="page-header">
+  <div>
+    <h1 class="page-title">Archivos</h1>
+    <p class="page-subtitle">{{ scopeDescription() }}</p>
+  </div>
+  <div class="header-actions">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar por nombre" (input)="onSearch($event)" />
+    </mat-form-field>
+    <button mat-stroked-button (click)="load()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
+    <button
+      mat-flat-button
+      (click)="fileInput.click()"
+      [disabled]="uploading() !== null"
+    >
+      <mat-icon>upload</mat-icon>
+      Subir archivo
+    </button>
+    <input
+      #fileInput
+      type="file"
+      hidden
+      [accept]="acceptedTypes()"
+      (change)="onFileSelected($event)"
+    />
+  </div>
+</header>
+
+@if (uploadHint()) {
+  <p class="upload-hint">
+    <mat-icon>info</mat-icon>
+    {{ uploadHint() }}
+  </p>
+}
+
+@if (uploading(); as current) {
+  <div class="upload-panel">
+    <span class="upload-icon">
+      <mat-icon>cloud_upload</mat-icon>
+    </span>
+    <div class="upload-info">
+      <span class="upload-name">{{ current.fileName }}</span>
+      <mat-progress-bar mode="determinate" [value]="current.progress" />
+    </div>
+    <span class="upload-percent">{{ current.progress }}%</span>
+  </div>
+}
+
+<section class="card">
+  @if (loading() && files().length === 0) {
+    <div class="state">
+      <mat-spinner diameter="36" />
+      <p>Cargando archivos…</p>
+    </div>
+  } @else if (error()) {
+    <div class="state state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>No se pudieron cargar los archivos.</p>
+      <button mat-flat-button (click)="load()">Reintentar</button>
+    </div>
+  } @else if (files().length === 0) {
+    <div class="state">
+      <mat-icon>folder_open</mat-icon>
+      <p>
+        {{ query().search ? 'Ningún archivo coincide con "' + query().search + '".' : 'No hay archivos para mostrar.' }}
+      </p>
+    </div>
+  } @else {
+    <div class="table-wrap" [class.table-wrap--loading]="loading()">
+      <table mat-table [dataSource]="files()">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let file">
+            <div class="file-name">
+              <span class="file-icon">
+                <mat-icon>{{ file.mimeType | fileIcon }}</mat-icon>
+              </span>
+              <span class="file-name__text" [title]="file.originalName">
+                {{ file.originalName }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="owner">
+          <th mat-header-cell *matHeaderCellDef>Cargado por</th>
+          <td mat-cell *matCellDef="let file">
+            <div class="owner">
+              <span>{{ file.owner.fullName }}</span>
+              @if (isMine(file)) {
+                <span class="badge" data-tone="accent">Tú</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="area">
+          <th mat-header-cell *matHeaderCellDef>Área</th>
+          <td mat-cell *matCellDef="let file">
+            @if (file.area) {
+              <span class="badge">{{ file.area.name }}</span>
+            } @else {
+              <span class="muted">Sin área</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="size">
+          <th mat-header-cell *matHeaderCellDef class="numeric">Tamaño</th>
+          <td mat-cell *matCellDef="let file" class="numeric">
+            {{ file.sizeBytes | fileSize }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Fecha de carga</th>
+          <td mat-cell *matCellDef="let file">
+            {{ file.createdAt | date: 'dd MMM yyyy, HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="cell-actions">Acciones</th>
+          <td mat-cell *matCellDef="let file" class="cell-actions">
+            @if (downloadingId() === file.id) {
+              <span class="action-spinner">
+                <mat-spinner diameter="20" />
+              </span>
+            } @else {
+              <button
+                mat-icon-button
+                matTooltip="Descargar"
+                [attr.aria-label]="'Descargar ' + file.originalName"
+                [disabled]="downloadingId() !== null"
+                (click)="download(file)"
+              >
+                <mat-icon>download</mat-icon>
+              </button>
+            }
+
+            @if (file.canDelete) {
+              @if (deletingId() === file.id) {
+                <span class="action-spinner">
+                  <mat-spinner diameter="20" />
+                </span>
+              } @else {
+                <button
+                  mat-icon-button
+                  class="btn-danger-icon"
+                  matTooltip="Eliminar"
+                  [attr.aria-label]="'Eliminar ' + file.originalName"
+                  [disabled]="deletingId() !== null"
+                  (click)="confirmRemove(file)"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              }
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+
+  }
+
+  @if (!error() && total() > 0) {
+    <mat-paginator
+      [length]="total()"
+      [pageIndex]="query().page - 1"
+      [pageSize]="query().limit"
+      [pageSizeOptions]="pageSizeOptions"
+      [disabled]="loading()"
+      showFirstLastButtons
+      (page)="onPageChange($event)"
+    />
+  }
+</section>

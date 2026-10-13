@@ -1,3 +1,5 @@
+import { FILE_TYPE_CATALOG } from '../files/file-types';
+
 export type StorageDriver = 's3' | 'local';
 
 export interface AppConfig {
@@ -17,6 +19,7 @@ export interface AppConfig {
   };
   files: {
     maxUploadBytes: number;
+    allowedExtensions: string[];
   };
   storage: {
     driver: StorageDriver;
@@ -38,6 +41,29 @@ function required(name: string): string {
     throw new Error(`Falta la variable de entorno requerida: ${name}`);
   }
   return value;
+}
+
+//Función para validar las exensiones permitidas
+function allowedExtensions(): string[] {
+  const raw = process.env.ALLOWED_FILE_EXTENSIONS;
+  if (!raw) {
+    return Object.keys(FILE_TYPE_CATALOG);
+  }
+
+  const extensions = raw
+    .split(',')
+    .map((ext) => ext.trim().toLowerCase().replace(/^\./, ''))
+    .filter(Boolean);
+
+  const unknown = extensions.filter((ext) => !(ext in FILE_TYPE_CATALOG));
+  //Se hace una validación inicial, por si se agregan extensiones en la variable de entorno que no pertenecen al listado seguro, como un exe o un bat
+  if (unknown.length > 0) {
+    throw new Error(
+      `ALLOWED_FILE_EXTENSIONS contiene extensiones fuera del catálogo seguro: ${unknown.join(', ')}`,
+    );
+  }
+  //Devuelve las extensiones permitidas seguras
+  return extensions;
 }
 
 export default (): AppConfig => {
@@ -63,6 +89,7 @@ export default (): AppConfig => {
     },
     files: {
       maxUploadBytes: Number(process.env.MAX_UPLOAD_MB ?? 20) * 1024 * 1024,
+      allowedExtensions: allowedExtensions(),
     },
     storage: {
       driver,

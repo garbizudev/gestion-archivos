@@ -1,0 +1,154 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--ga-topbar-height);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--ga-surface);
+  border-bottom: 1px solid var(--ga-border);
+  box-shadow: var(--ga-shadow-sm);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--ga-text-on-primary);
+  background: linear-gradient(135deg, var(--ga-primary-light), var(--ga-primary-dark));
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.brand-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ga-text-primary);
+}
+
+.nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  margin-left: 24px;
+}
+
+.nav-link {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ga-text-secondary);
+  transition: color var(--ga-transition);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    color: var(--ga-text-primary);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: transparent;
+    transition: background var(--ga-transition);
+  }
+}
+
+.nav-link--active {
+  color: var(--ga-primary);
+
+  &::after {
+    background: linear-gradient(90deg, var(--ga-primary-light), var(--ga-accent));
+  }
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 12px;
+  color: var(--ga-text-secondary);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ga-accent);
+  background: var(--ga-accent-bg);
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 40px;
+}
+
+@media (max-width: 640px) {
+  .brand-name,
+  .user-info,
+  .nav-link span {
+    display: none;
+  }
+
+  .nav {
+    margin-left: 8px;
+  }
+}

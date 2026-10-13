@@ -1,0 +1,25 @@
+<div class="dialog">
+  <span class="dialog-icon" [class.dialog-icon--danger]="tone === 'danger'">
+    <mat-icon>{{ tone === 'danger' ? 'delete_outline' : 'help_outline' }}</mat-icon>
+  </span>
+
+  <h2 class="dialog-title">{{ data.title }}</h2>
+  <p class="dialog-message">{{ data.message }}</p>
+  @if (data.detail) {
+    <p class="dialog-detail">{{ data.detail }}</p>
+  }
+
+  <div class="dialog-actions">
+    <button mat-stroked-button [mat-dialog-close]="false">
+      {{ data.cancelText ?? 'Cancelar' }}
+    </button>
+    <button
+      mat-flat-button
+      [class.btn-danger]="tone === 'danger'"
+      [mat-dialog-close]="true"
+      cdkFocusInitial
+    >
+      {{ data.confirmText ?? 'Confirmar' }}
+    </button>
+  </div>
+</div>

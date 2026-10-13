@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.area-name {
+  font-weight: 600;
+}
+
+.area-name--inactive {
+  opacity: 0.55;
+}
+
+.description {
+  max-width: 420px;
+  color: var(--ga-text-secondary);
+}

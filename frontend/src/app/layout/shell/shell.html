@@ -1,0 +1,47 @@
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">
+      <mat-icon>folder_shared</mat-icon>
+    </span>
+    <span class="brand-name">Gestión de Archivos</span>
+  </div>
+
+  <nav class="nav">
+    <a class="nav-link" routerLink="/archivos" routerLinkActive="nav-link--active">
+      <mat-icon>folder</mat-icon>
+      <span>Archivos</span>
+    </a>
+    <a class="nav-link" routerLink="/historial" routerLinkActive="nav-link--active">
+      <mat-icon>history</mat-icon>
+      <span>Historial</span>
+    </a>
+    @if (isAdmin()) {
+      <a class="nav-link" routerLink="/administracion" routerLinkActive="nav-link--active">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Administración</span>
+      </a>
+    }
+  </nav>
+
+  @if (auth.user(); as user) {
+    <div class="user">
+      <div class="user-info">
+        <span class="user-name">{{ user.fullName }}</span>
+        <span class="user-role">
+          {{ user.roleName }}
+          @if (user.areaName) {
+            · {{ user.areaName }}
+          }
+        </span>
+      </div>
+      <span class="avatar">{{ initials() }}</span>
+      <button mat-icon-button matTooltip="Cerrar sesión" aria-label="Cerrar sesión" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  }
+</header>
+
+<main class="content">
+  <router-outlet />
+</main>

@@ -1,0 +1,48 @@
+:root {
+  --ga-primary: #1b2a4e;
+  --ga-primary-dark: #0f1a33;
+  --ga-primary-light: #2e4a86;
+  --ga-primary-bg: #eef2fa;
+
+  --ga-accent: #c2185b;
+  --ga-accent-light: #e2457f;
+  --ga-accent-bg: #fdecf3;
+
+  --ga-surface: #ffffff;
+  --ga-surface-hover: #f6f8fc;
+  --ga-bg-page: #f5f7fb;
+  --ga-input-bg: #f0f2f6;
+  --ga-input-bg-focus: #e8edf5;
+
+  --ga-border: #e2e8f0;
+  --ga-border-strong: #cbd5e1;
+
+  --ga-text-primary: #0f172a;
+  --ga-text-secondary: #64748b;
+  --ga-text-muted: #94a3b8;
+  --ga-text-on-primary: #ffffff;
+
+  --ga-success: #16a34a;
+  --ga-success-bg: #dcfce7;
+  --ga-warning: #d97706;
+  --ga-warning-bg: #fef3c7;
+  --ga-error: #dc2626;
+  --ga-error-bg: #fee2e2;
+  --ga-info: #0ea5e9;
+  --ga-info-bg: #e0f2fe;
+
+  --ga-topbar-height: 64px;
+  --ga-sidebar-width: 240px;
+  --ga-radius-sm: 8px;
+  --ga-radius-md: 12px;
+  --ga-radius-lg: 20px;
+  --ga-radius-pill: 999px;
+  --ga-transition: 0.2s ease;
+
+  --ga-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --ga-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --ga-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+
+  --ga-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ga-fs-base: 14px;
+}
