@@ -4,10 +4,10 @@
     <p class="page-subtitle">{{ scopeDescription() }}</p>
   </div>
   <div class="header-actions">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput placeholder="Buscar por nombre" (input)="onSearch($event)" />
-    </mat-form-field>
+    <label class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Buscar por nombre" (input)="onSearch($event)" />
+    </label>
     <button mat-stroked-button (click)="load()" [disabled]="loading()">
       <mat-icon>refresh</mat-icon>
       Actualizar

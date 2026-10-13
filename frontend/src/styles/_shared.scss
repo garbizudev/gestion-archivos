@@ -26,6 +26,51 @@
   gap: 12px;
 }
 
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 260px;
+  height: 40px;
+  padding: 0 16px 0 42px;
+  border-radius: var(--ga-radius-pill);
+  border: 1px solid var(--ga-border-strong);
+  background: var(--ga-surface);
+  cursor: text;
+  transition:
+    border-color var(--ga-transition),
+    box-shadow var(--ga-transition);
+
+  &:focus-within {
+    border-color: var(--ga-primary-light);
+    box-shadow: 0 0 0 3px rgba(46, 74, 134, 0.15);
+  }
+
+  mat-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--ga-text-muted);
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ga-text-primary);
+
+    &::placeholder {
+      color: var(--ga-text-muted);
+    }
+  }
+}
+
 .card {
   border-radius: var(--ga-radius-md);
   border: 1px solid var(--ga-border);

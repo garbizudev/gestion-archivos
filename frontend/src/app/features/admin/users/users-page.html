@@ -4,10 +4,10 @@
     <p class="page-subtitle">Administre los usuarios, sus roles y las áreas a las que pertenecen.</p>
   </div>
   <div class="header-actions">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput placeholder="Buscar por nombre o correo" (input)="onSearch($event)" />
-    </mat-form-field>
+    <label class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Buscar por nombre o correo" (input)="onSearch($event)" />
+    </label>
     <button mat-flat-button (click)="openForm()" [disabled]="loading() || error()">
       <mat-icon>person_add</mat-icon>
       Nuevo usuario
